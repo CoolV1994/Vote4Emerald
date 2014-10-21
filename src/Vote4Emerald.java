@@ -22,33 +22,38 @@ public class Vote4Emerald implements VoteListener {
         log.info("Received: " + vote);
         if (vote.getUsername() != null) {
             Votifier.getServer().broadcastMessage(
-                    "Thanks " + ChatColor.AQUA + vote.getUsername() + ChatColor.RESET + " for voting on " + vote.getServiceName() + ".");
+                    "Thanks " + ChatColor.AQUA + vote.getUsername()
+                    + ChatColor.RESET + " for voting on "
+                    + ChatColor.LIGHT_PURPLE + vote.getServiceName() + ".");
             MC_Player player = Votifier.getServer().getOnlinePlayerByName(vote.getUsername());
             if (player != null) {
                 List<MC_ItemStack> inventory = player.getInventory();
-                int freeSlot = -1;
+                int destinationSlot = -1;
                 int stackAmt = 1;
                 for (int i = 0; i < inventory.size(); i++)
                 {
-                    if (freeSlot == -1) {
+                    if (destinationSlot == -1) {
                         MC_ItemStack is = inventory.get(i);
                         if ((is == null) || (is.getId() == 0)) {
-                            freeSlot = i;
+                            destinationSlot = i;
                         }
                         if ((is.getId() == 388) && (is.getCount() < 64)) {
-                            freeSlot = i;
+                            destinationSlot = i;
                             stackAmt = is.getCount() + 1;
                         }
                     }
                 }
-                if (freeSlot == -1)
+
+                MC_ItemStack emeraldStack = Votifier.getServer().createItemStack(388, stackAmt, 0);
+
+                if (destinationSlot == -1)
                 {
-                    player.sendMessage(ChatColor.RED + "You do not have enough free space in your inventory.");
+                    player.sendMessage(ChatColor.RED + "You do not have enough free space in your inventory. " + ChatColor.GREEN + "Dropping on ground.");
+                    player.getWorld().dropItem(emeraldStack, player.getLocation(), null);
                     return;
                 }
 
-                MC_ItemStack is = Votifier.getServer().createItemStack(388, stackAmt, 0);
-                inventory.set(freeSlot, is);
+                inventory.set(destinationSlot, emeraldStack);
                 player.setInventory(inventory);
                 player.updateInventory();
                 player.sendMessage(ChatColor.GREEN + "You receive an Emerald.");
