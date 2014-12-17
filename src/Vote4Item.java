@@ -24,12 +24,12 @@ public class Vote4Item implements VoteListener {
         File configFile = new File("./plugins/Votifier/Vote4Item.txt");
         if (!configFile.exists())
         {
+            // Default: Give 4 Emeralds
+            ItemStack emeralds = new ItemStack(388, 4);
+            items.add(emeralds);
             try {
-                configFile.createNewFile();
-                // Default: Give 4 Emeralds
-                ItemStack emeralds = new ItemStack(388, 4);
-                items.add(emeralds);
                 // Write Default Config
+                configFile.createNewFile();
                 FileWriter fw = new FileWriter(configFile);
                 BufferedWriter bw = new BufferedWriter(fw);
                 bw.write("# Vote4Item Configuration");
@@ -54,30 +54,7 @@ public class Vote4Item implements VoteListener {
                     if (currentLine.startsWith("#")) {
                         continue;
                     }
-                    // Separate ID from Amount
-                    String sItemID;
-                    int amount;
-                    if (currentLine.contains("=")) {
-                        String[] split = currentLine.split("=");
-                        sItemID = split[0];
-                        amount = Integer.parseInt(split[1]);
-                    } else {
-                        sItemID = currentLine;
-                        amount = 1;
-                    }
-                    // Separate Item ID and Damage ID
-                    int itemID;
-                    short damageID;
-                    if (sItemID.contains(":")) {
-                        String[] splitID = sItemID.split(":");
-                        itemID = Integer.parseInt(splitID[0]);
-                        damageID = Short.parseShort(splitID[1]);
-                    } else {
-                        itemID = Integer.parseInt(sItemID);
-                        damageID = 0;
-                    }
-                    // Add ItemStack to List
-                    items.add(new ItemStack(itemID, amount, damageID));
+                    items.add(createItemStack(currentLine));
                 }
             } catch (IOException e) {
                 log.warning("Error loading Vote4Item configuration.");
@@ -100,6 +77,7 @@ public class Vote4Item implements VoteListener {
         if (username != null)
         {
             // Broadcast Message
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "");
             Bukkit.broadcastMessage(
                     "Thanks " + ChatColor.AQUA + username +
                             ChatColor.RESET + " for voting on " +
@@ -116,5 +94,32 @@ public class Vote4Item implements VoteListener {
                 player.sendMessage(ChatColor.GREEN + "Vote reward received.");
             }
         }
+    }
+
+    public ItemStack createItemStack(String line) {
+        // Separate ID from Amount
+        String sItemID;
+        int amount;
+        if (line.contains("=")) {
+            String[] split = line.split("=");
+            sItemID = split[0];
+            amount = Integer.parseInt(split[1]);
+        } else {
+            sItemID = line;
+            amount = 1;
+        }
+        // Separate Item ID and Damage ID
+        int itemID;
+        short damageID;
+        if (sItemID.contains(":")) {
+            String[] splitID = sItemID.split(":");
+            itemID = Integer.parseInt(splitID[0]);
+            damageID = Short.parseShort(splitID[1]);
+        } else {
+            itemID = Integer.parseInt(sItemID);
+            damageID = 0;
+        }
+        // Create the ItemStack
+        return new ItemStack(itemID, amount, damageID);
     }
 }
