@@ -40,7 +40,7 @@ public class Vote4Item implements VoteListener {
                 bw.newLine();
                 bw.close();
             } catch (IOException e) {
-                log.warning("Creating default Vote4Item configuration.");
+                log.warning("Error creating default Vote4Item configuration.");
             }
         }
         else
