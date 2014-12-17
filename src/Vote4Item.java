@@ -7,7 +7,6 @@ import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VoteListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -112,18 +111,7 @@ public class Vote4Item implements VoteListener {
                 PlayerInventory inventory = player.getInventory();
                 final HashMap<Integer, ItemStack> failed = inventory.addItem(items.toArray(new ItemStack[items.size()]));
                 if (failed.size() > 0) {
-                    Bukkit.getScheduler().runTask(Votifier.getInstance(), new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int index = 0; index < failed.size(); index++) {
-                                ItemStack drop = failed.get(index);
-                                Location loc = player.getLocation();
-                                player.getWorld().dropItem(loc, drop);
-                                player.sendMessage(ChatColor.RED + "Could not add to inventory. Dropping " +
-                                        ChatColor.GOLD + drop.getType().name() + ChatColor.RED + " on ground.");
-                            }
-                        }
-                    });
+                    Bukkit.getScheduler().runTask(Votifier.getInstance(), new ItemDrop(failed, player));
                 }
                 player.sendMessage(ChatColor.GREEN + "Vote reward received.");
             }
