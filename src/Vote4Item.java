@@ -19,11 +19,17 @@ public class Vote4Item implements VoteListener {
     private Logger log = Logger.getLogger("Vote4Item");
     /** The vote reward list. */
     private ArrayList<ItemStack> items = new ArrayList<ItemStack>();
+    /** The broadcast message. */
+    private String broadcastMessage = null;
 
     public Vote4Item() {
         File configFile = new File("./plugins/Votifier/Vote4Item.txt");
         if (!configFile.exists())
         {
+            // Default vote message
+            broadcastMessage = "Thanks " + ChatColor.AQUA + "{username}" +
+                    ChatColor.RESET + " for voting on " +
+                    ChatColor.BLUE + "{serviceName}";
             // Default: Give 4 Emeralds
             ItemStack emeralds = new ItemStack(388, 4);
             items.add(emeralds);
@@ -33,6 +39,16 @@ public class Vote4Item implements VoteListener {
                 FileWriter fw = new FileWriter(configFile);
                 BufferedWriter bw = new BufferedWriter(fw);
                 bw.write("# Vote4Item Configuration");
+                bw.newLine();
+                bw.write("#");
+                bw.newLine();
+                bw.write("# Broadcast Message");
+                bw.newLine();
+                bw.write("message=" + broadcastMessage);
+                bw.newLine();
+                bw.write("#");
+                bw.newLine();
+                bw.write("# Vote Rewards");
                 bw.newLine();
                 bw.write("# Item ID:Damage=Amount");
                 bw.newLine();
@@ -54,6 +70,12 @@ public class Vote4Item implements VoteListener {
                     if (currentLine.startsWith("#")) {
                         continue;
                     }
+                    // Vote Message
+                    if (currentLine.startsWith("message=")) {
+                        broadcastMessage = currentLine.substring(8);
+                        continue;
+                    }
+                    // Item
                     items.add(createItemStack(currentLine));
                 }
             } catch (IOException e) {
@@ -72,16 +94,17 @@ public class Vote4Item implements VoteListener {
     @Override
     public void voteMade(final Vote vote)
     {
-        log.info("Received: " + vote);
+        log.info("[Vote4Item] Received: " + vote);
         String username = vote.getUsername();
         if (username != null)
         {
             // Broadcast Message
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "");
-            Bukkit.broadcastMessage(
-                    "Thanks " + ChatColor.AQUA + username +
-                            ChatColor.RESET + " for voting on " +
-                            ChatColor.BLUE + vote.getServiceName() + ".");
+            if (broadcastMessage != null && !broadcastMessage.isEmpty()) {
+                Bukkit.broadcastMessage(broadcastMessage
+                                .replace("{username}", username)
+                                .replace("{serviceName}", vote.getServiceName())
+                );
+            }
             // Give Items
             final Player player = Bukkit.getPlayerExact(username);
             if (player != null)
