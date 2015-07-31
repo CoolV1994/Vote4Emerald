@@ -175,6 +175,7 @@ public class Vote4Item implements VoteListener {
                 try {
                     items.add(createItemStack(currentLine));
                 } catch (Exception e) {
+                    log.severe("Error creating vote reward.\n\tLine: " + currentLine);
                     e.printStackTrace();
                 }
             }
